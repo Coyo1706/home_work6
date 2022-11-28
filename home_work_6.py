@@ -9,27 +9,27 @@ except FileNotFoundError:
     print(f"The path '{root_direct}' does not exist, please make sure it is typed correctly.")
 
 try:
-    os.mkdir(fr"{root_direct}\video")
+    os.mkdir(os.path.join(f"{root_direct}", "video"))
 except FileExistsError:
     pass
 try:
-    os.mkdir(fr"{root_direct}\audio")
+    os.mkdir(os.path.join(f"{root_direct}", "audio"))
 except FileExistsError:
     pass
 try:
-    os.mkdir(fr"{root_direct}\archives")
+    os.mkdir(os.path.join(f"{root_direct}", "archives"))
 except FileExistsError:
     pass
 try:
-    os.mkdir(fr"{root_direct}\images")
+    os.mkdir(os.path.join(f"{root_direct}", "images"))
 except FileExistsError:
     pass
 try:
-    os.mkdir(fr"{root_direct}\documents")
+    os.mkdir(os.path.join(f"{root_direct}", "documents"))
 except FileExistsError:
     pass
 try:
-    os.mkdir(fr"{root_direct}\others")
+    os.mkdir(os.path.join(f"{root_direct}", "others"))
 except FileExistsError:
     pass
 
@@ -40,7 +40,7 @@ audio = (".mp3", ".ogg", ".wav", ".amr")
 archives = (".zip", ".rar", ".gz", ".tar")
 
 path_trash = list()
-
+archive_files = list()
 
 
 filter_dir = (fr"{root_direct}", fr"{root_direct}\video", fr"{root_direct}\audio", fr"{root_direct}\archives",
@@ -100,45 +100,32 @@ for path, direct, files in os.walk(root_direct):
                                                                              f"{normalize(file)}"))
             except shutil.Error:
                 pass
+
         elif file.endswith(archives):
 
             old_file = os.path.join(path, file)
             new_file = os.path.join(path, normalize(file))
             os.rename(old_file, new_file)
             archive_dir = os.path.basename(new_file).split('.')[0]
-            archive_rormat = new_file.split('.')[-1]
-            archive_files = list()
-            archive_files.append(new_file)
-            print(archive_files)
-            print(archive_dir)
+            archive_format = new_file.split('.')[-1]
+            archive = os.path.basename(new_file)
+            if archive_format != "rar":
+                archive_files.append(archive)
+                archive_files = list(set(archive_files))
+            # print(archive_dir)
+            shutil.move(new_file, os.path.join(f"{root_direct}", "archives", archive))
+            count = len(archive_files)
+            for archive in archive_files:
+                while count != 0:
 
-            if archive_rormat == "rar":
-                try:
-                    shutil.move(new_file, os.path.join(f"{root_direct}", "archives"))
-                except shutil.Error:
-                    pass
+                    # try:
+                    shutil.unpack_archive(os.path.join(f"{root_direct}", "archives", archive),
+                                          os.path.join(f"{root_direct}", "archives", f"{archive_dir}"))
+                    # except shutil.ReadError:
+                    #     pass
+                    count -= 1
 
-            else:
-                shutil.unpack_archive(new_file, os.path.join(f"{root_direct}","archives", f"{archive_dir}"),
-                                      format=archive_rormat)
 
-        # elif file.endswith(archives):
-        #     old_file = os.path.join(path, file)
-        #     new_file = os.path.join(path, normalize(file))
-        #     os.rename(old_file, new_file)
-        #     archive_dir = os.path.basename(new_file).split('.')[0]
-        #     archive_rormat = new_file.split('.')[-1]
-        #     archive_files = list()
-        #     archive_files.append(new_file)
-        #     print(archive_files)
-        #     for new_file in archive_files:
-        #         try:
-        #             shutil.unpack_archive(new_file, fr"{root_direct}\archives\{archive_dir}", format=archive_rormat)
-        #         except:
-        #             try:
-        #                 shutil.move(new_file, fr"{root_direct}\archives")
-        #             except:
-        #                 continue
         else:
             try:
                 shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}", "others"))
@@ -150,4 +137,7 @@ for path, direct, files in os.walk(root_direct):
 
     for dir_path in dir_del:
         shutil.rmtree(dir_path, ignore_errors=True)
+print(archive_files)
+stop_scrypt = input("Done! Press 'Enter' to exit.")
 
+# D:\GoIt\trash
